@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sector Dashboard — S&amp;P 500 Sectors 2019–2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><div class="inner">
+  <span class="brand">Sector Scorecard</span>
+  <a href="index.html">Report</a>
+  <a href="dashboard.html" class="active">Dashboard</a>
+</div></nav>
+
+<main>
+  <p class="kicker">Dashboard</p>
+  <h1>Which S&amp;P 500 sectors beat the market? Monthly sector returns, January 2019 – September 2026</h1>
+  <p class="byline">Robert Weiner · Every number is computed in your browser from <code>sector_returns_2019_2026.csv</code>.</p>
+
+  <div class="dash">
+    <aside class="filters">
+      <h3>Filters</h3>
+      <label for="from">Months</label>
+      <div class="row2">
+        <select id="from" aria-label="First month"></select>
+        <select id="to" aria-label="Last month"></select>
+      </div>
+      <div class="quick" id="quick">
+        <button data-q="all">Full period</button>
+        <button data-q="2020">2020</button>
+        <button data-q="2022">2022</button>
+        <button data-q="2023-">2023 on</button>
+        <button data-q="12">Last 12 mo.</button>
+      </div>
+      <label for="dir">S&amp;P 500 direction that month</label>
+      <select id="dir">
+        <option value="all">All months</option>
+        <option value="down">Months the S&amp;P 500 fell</option>
+        <option value="up">Months the S&amp;P 500 rose</option>
+      </select>
+      <label>Sectors</label>
+      <div class="team-list" id="sectors"></div>
+      <div class="mini-btns"><button id="allS">All</button><button id="noS">None</button></div>
+      <button class="primary" id="reset">Reset filters</button>
+    </aside>
+
+    <section>
+      <p class="filter-summary" id="filterSummary"></p>
+      <div class="kpis">
+        <div class="kpi"><div class="value" id="k1"></div><div class="label">Sector-months counted</div></div>
+        <div class="kpi"><div class="value" id="k2"></div><div class="label">Average monthly return</div></div>
+        <div class="kpi"><div class="value" id="k3"></div><div class="label">Average monthly excess return vs. S&amp;P 500</div></div>
+        <div class="kpi"><div class="value" id="k4"></div><div class="label">Share of sector-months that beat the S&amp;P 500</div></div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">Growth of $100 over the selected months</div>
+        <div class="canvas-wrap" style="height:380px"><canvas id="cGrowth"></canvas></div>
+        <p class="note" id="growthNote"></p>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-head">
+          <div class="chart-title" id="barTitle">By sector</div>
+          <div class="seg" id="measure">
+            <button data-m="ex" class="on">Excess return</button>
+            <button data-m="beat">Beat rate</button>
+            <button data-m="avg">Avg return</button>
+            <button data-m="sd">Volatility</button>
+          </div>
+        </div>
+        <div class="canvas-wrap" style="height:400px"><canvas id="cBar"></canvas></div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">Average monthly excess return vs. S&amp;P 500 by year, percentage points</div>
+        <div class="table-wrap"><table class="heat" id="heat"></table></div>
+        <p class="note">Blue: beat the S&amp;P 500 on average. Orange: trailed. Bold: that year's leader among the selected sectors. 2026 covers January–September.</p>
+      </div>
+
+      <h3>Numbers behind the current view</h3>
+      <div class="table-wrap">
+        <table id="tbl">
+          <thead><tr>
+            <th class="sortable" data-k="sector">Sector</th>
+            <th class="sortable" data-k="n">Months</th>
+            <th class="sortable" data-k="avg">Avg return</th>
+            <th class="sortable" data-k="ex">Avg excess</th>
+            <th class="sortable" data-k="beat">Beat rate</th>
+            <th class="sortable" data-k="sd">Volatility</th>
+            <th class="sortable" data-k="tot">Total return</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note">Click a column heading to sort. Total return compounds the selected months in date order. This is a class analysis of past returns, not investment advice.</p>
+    </section>
+  </div>
+</main>
+
+<script src="chart.umd.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+  const rows = await loadData();
+  const $ = id => document.getElementById(id);
+  const months = [...new Set(rows.map(r => r.ym))].sort();
+  const allSectors = [...new Set(rows.map(r => r.sector))].sort();
+  const spxByMonth = {}; rows.forEach(r => spxByMonth[r.ym] = r.sp500_return);
+
+  months.forEach(m => { $('from').add(new Option(fmtYM(m), m)); $('to').add(new Option(fmtYM(m), m)); });
+  $('sectors').innerHTML = allSectors.map((t, i) =>
+    `<div><input type="checkbox" id="s${i}" value="${t}" checked><label for="s${i}" style="margin:0;font-weight:400">` +
+    `<span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${SECTOR_COLORS[t]};margin-right:5px"></span>${t}</label></div>`).join('');
+  const boxes = [...$('sectors').querySelectorAll('input')];
+
+  const DEF = () => ({ from: months[0], to: months.at(-1), dir: 'all', sectors: new Set(allSectors), measure: 'ex' });
+  const state = Object.assign(DEF(), { sortK: 'ex', sortDir: -1 });
+  const q = new URLSearchParams(location.search);
+  if (months.includes(q.get('from'))) state.from = q.get('from');
+  if (months.includes(q.get('to'))) state.to = q.get('to');
+  if (['up', 'down'].includes(q.get('dir'))) state.dir = q.get('dir');
+  if (q.get('sectors')) state.sectors = new Set(q.get('sectors').split('|').filter(s => allSectors.includes(s)));
+  if (['ex', 'beat', 'avg', 'sd'].includes(q.get('measure'))) state.measure = q.get('measure');
+
+  function sync() {
+    $('from').value = state.from; $('to').value = state.to; $('dir').value = state.dir;
+    boxes.forEach(b => b.checked = state.sectors.has(b.value));
+    document.querySelectorAll('#measure button').forEach(b => b.classList.toggle('on', b.dataset.m === state.measure));
+  }
+  function writeUrl() {
+    const d = DEF(), p = new URLSearchParams();
+    if (state.from !== d.from) p.set('from', state.from);
+    if (state.to !== d.to) p.set('to', state.to);
+    if (state.dir !== 'all') p.set('dir', state.dir);
+    if (state.sectors.size !== allSectors.length) p.set('sectors', [...state.sectors].join('|'));
+    if (state.measure !== 'ex') p.set('measure', state.measure);
+    history.replaceState(null, '', p.toString() ? '?' + p : location.pathname);
+  }
+  const monthOk = m => m >= state.from && m <= state.to &&
+    (state.dir === 'all' || (state.dir === 'down' ? spxByMonth[m] < 0 : spxByMonth[m] >= 0));
+  const filtered = () => rows.filter(r => monthOk(r.ym) && state.sectors.has(r.sector));
+
+  const cGrowth = new Chart($('cGrowth'), { type: 'line', data: { labels: [], datasets: [] },
+    options: { animation: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'right', labels: { font: { size: 12 } } },
+        tooltip: { itemSort: (a, b) => b.parsed.y - a.parsed.y, callbacks: { label: c => `${c.dataset.label}: $${fmtInt(c.parsed.y)}` } } },
+      scales: { y: { title: { display: true, text: 'Value of $100' }, ticks: { callback: x => '$' + fmtInt(x) } }, x: { ticks: { maxTicksLimit: 8 } } } } });
+  const cBar = new Chart($('cBar'), { type: 'bar', data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { y: { ticks: { autoSkip: false } } } } });
+
+  const MEAS = {
+    ex: { title: 'Average monthly excess return vs. S&P 500, by sector', fmt: x => fmtPP(x), axis: 'Percentage points', ref: true },
+    beat: { title: 'Share of months the sector beat the S&P 500', fmt: x => fmtPct(x, 1), axis: 'Percent of months' },
+    avg: { title: 'Average monthly return, by sector', fmt: x => fmtPct(x), axis: 'Percent per month', ref: true },
+    sd: { title: 'Volatility (standard deviation of monthly returns), by sector', fmt: x => fmtPct(x), axis: 'Percent' }
+  };
+
+  function render() {
+    const f = filtered();
+    const s = summary(f);
+    $('k1').textContent = fmtInt(s.sectorMonths); $('k2').textContent = fmtPct(s.avgReturn);
+    $('k3').textContent = fmtPP(s.avgExcess); $('k4').textContent = fmtPct(s.beatShare, 1);
+    const selMonths = months.filter(monthOk);
+    $('filterSummary').textContent = `Showing ${fmtYM(state.from)} – ${fmtYM(state.to)}` +
+      (state.dir === 'all' ? '' : state.dir === 'down' ? ', only months the S&P 500 fell' : ', only months the S&P 500 rose') +
+      `, ${state.sectors.size === allSectors.length ? 'all 11 sectors' : state.sectors.size + ' of 11 sectors'}: ${selMonths.length} months.`;
+
+    // Growth chart
+    const by = groupBy(f, 'sector');
+    const spx = selMonths.map(m => ({ ym: m, monthly_return: spxByMonth[m] }));
+    const ds = Object.keys(by).sort().map(sct => ({ label: sct, data: growth(by[sct]).map(g => g.v),
+      borderColor: SECTOR_COLORS[sct], backgroundColor: SECTOR_COLORS[sct], borderWidth: 1.8, pointRadius: 0, tension: .1 }));
+    if (spx.length) ds.unshift({ label: 'S&P 500', data: growth(spx).map(g => g.v), borderColor: COLORS.spx, backgroundColor: COLORS.spx,
+      borderWidth: 3, borderDash: [6, 4], pointRadius: 0, tension: .1 });
+    cGrowth.data.labels = selMonths.map(fmtYM); cGrowth.data.datasets = ds; cGrowth.update();
+    $('growthNote').textContent = state.dir === 'all' ? 'Dividends reinvested. The dashed line is the S&P 500.' :
+      'Only the filtered months are compounded, back to back, so this shows the cumulative effect of those months alone.';
+
+    // Bar + table
+    const stats = Object.keys(by).map(sct => ({ sector: sct, n: by[sct].length, avg: mean(by[sct], 'monthly_return'),
+      ex: mean(by[sct], 'excess_return'), beat: mean(by[sct], 'beat_sp500') * 100, sd: sd(by[sct], 'monthly_return'), tot: totalReturn(by[sct]) }));
+    const m = MEAS[state.measure], k = state.measure;
+    const bars = stats.filter(d => isFinite(d[k])).sort((a, b) => b[k] - a[k]);
+    $('barTitle').textContent = m.title;
+    cBar.data.labels = bars.map(d => d.sector);
+    cBar.data.datasets[0].data = bars.map(d => d[k]);
+    cBar.data.datasets[0].backgroundColor = bars.map(d => m.ref ? (d[k] >= 0 ? COLORS.pos : COLORS.neg) : SECTOR_COLORS[d.sector]);
+    cBar.options.scales.x = { title: { display: true, text: m.axis }, ticks: { callback: x => m.fmt(x) } };
+    if (k === 'beat') { cBar.options.scales.x.min = 0; cBar.options.scales.x.max = 100; }
+    cBar.options.plugins.tooltip = { callbacks: { label: c => m.fmt(c.parsed.x) } };
+    cBar.update();
+
+    stats.sort((a, b) => {
+      const x = a[state.sortK], y = b[state.sortK];
+      return typeof x === 'string' ? state.sortDir * x.localeCompare(y) : state.sortDir * ((isFinite(x) ? x : -1e9) - (isFinite(y) ? y : -1e9));
+    });
+    document.querySelector('#tbl tbody').innerHTML = stats.map(d =>
+      `<tr><td>${d.sector}</td><td>${d.n}</td><td>${fmtPct(d.avg)}</td><td class="${d.ex >= 0 ? 'pos' : 'neg'}">${fmtPP(d.ex)}</td>` +
+      `<td>${fmtPct(d.beat, 1)}</td><td>${fmtPct(d.sd)}</td><td>${fmtSignedPct(d.tot)}</td></tr>`).join('');
+
+    // Heatmap
+    const years = [...new Set(f.map(r => r.year))].sort();
+    const secs = Object.keys(by).sort((a, b) => mean(by[b], 'excess_return') - mean(by[a], 'excess_return'));
+    const cell = {}; let max = 0.01;
+    years.forEach(y => secs.forEach(sct => { const x = mean(by[sct].filter(r => r.year === y), 'excess_return'); cell[y + sct] = x; if (isFinite(x)) max = Math.max(max, Math.abs(x)); }));
+    const leader = {}; years.forEach(y => leader[y] = secs.filter(s => isFinite(cell[y + s])).reduce((a, b) => (a === undefined || cell[y + b] > cell[y + a]) ? b : a, undefined));
+    let h = '<thead><tr><th>Sector</th>' + years.map(y => `<th>${y}</th>`).join('') + '</tr></thead><tbody>';
+    secs.forEach(sct => {
+      h += `<tr><td>${sct}</td>` + years.map(y => { const x = cell[y + sct];
+        return `<td style="background:${heatColor(x, max)};color:${heatText(x, max)};${leader[y] === sct && secs.length > 1 ? 'font-weight:700' : ''}">${isFinite(x) ? (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(2) : ''}</td>`; }).join('') + '</tr>';
+    });
+    $('heat').innerHTML = secs.length ? h + '</tbody>' : '<tbody><tr><td>No sectors selected.</td></tr></tbody>';
+
+    writeUrl();
+  }
+
+  $('from').onchange = e => { state.from = e.target.value; if (state.from > state.to) state.to = state.from; sync(); render(); };
+  $('to').onchange = e => { state.to = e.target.value; if (state.to < state.from) state.from = state.to; sync(); render(); };
+  $('dir').onchange = e => { state.dir = e.target.value; render(); };
+  boxes.forEach(b => b.onchange = () => { b.checked ? state.sectors.add(b.value) : state.sectors.delete(b.value); render(); });
+  $('allS').onclick = () => { state.sectors = new Set(allSectors); sync(); render(); };
+  $('noS').onclick = () => { state.sectors = new Set(); sync(); render(); };
+  $('reset').onclick = () => { Object.assign(state, DEF()); sync(); render(); };
+  document.querySelectorAll('#quick button').forEach(b => b.onclick = () => {
+    const qv = b.dataset.q;
+    if (qv === 'all') { state.from = months[0]; state.to = months.at(-1); }
+    else if (qv === '12') { state.from = months.at(-12); state.to = months.at(-1); }
+    else if (qv.endsWith('-')) { state.from = qv.slice(0, 4) + '-01'; state.to = months.at(-1); }
+    else { state.from = qv + '-01'; state.to = qv + '-12'; }
+    sync(); render();
+  });
+  document.querySelectorAll('#measure button').forEach(b => b.onclick = () => { state.measure = b.dataset.m; sync(); render(); });
+  document.querySelectorAll('#tbl th.sortable').forEach(th => th.onclick = () => {
+    const k = th.dataset.k; state.sortDir = state.sortK === k ? -state.sortDir : (k === 'sector' ? 1 : -1); state.sortK = k; render();
+  });
+
+  sync(); render();
+})();
+</script>
+</body>
+</html>

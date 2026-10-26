@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Sectors Beat the Market? S&amp;P 500 Sectors 2019–2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><div class="inner">
+  <span class="brand">Sector Scorecard</span>
+  <a href="index.html" class="active">Report</a>
+  <a href="dashboard.html">Dashboard</a>
+</div></nav>
+
+<main class="narrow">
+  <p class="kicker">Report for a portfolio manager setting sector weights</p>
+  <h1>Which S&amp;P 500 sectors beat the market? Monthly returns for 1,023 sector-months, January 2019 – September 2026</h1>
+  <p class="byline">Robert Weiner</p>
+
+  <p class="lede">
+    Only Technology beat the S&amp;P 500 by a wide margin: it averaged <b data-v="techEx"></b> a month above the index and turned
+    $100 into <b data-v="techGrowth"></b>, against <span data-v="spxGrowth"></span> for the S&amp;P 500, while nine of the eleven sectors
+    trailed the index on average. The defensive sectors paid off in a different way: in the <span data-v="nDown"></span> months the
+    S&amp;P 500 fell, Utilities, Consumer Staples and Health Care beat it by <span data-v="defDownEx"></span> a month on average.
+    A portfolio manager should keep Technology as the core overweight and hold Utilities, Staples and Health Care as a hedge sized for
+    down markets, not as a source of return.
+  </p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="value" data-v="sectorMonths"></div><div class="label">Sector-months counted</div></div>
+    <div class="kpi"><div class="value" data-v="avgReturn"></div><div class="label">Average monthly return</div></div>
+    <div class="kpi"><div class="value" data-v="avgExcess"></div><div class="label">Average monthly excess return vs. S&amp;P 500</div></div>
+    <div class="kpi"><div class="value" data-v="beatShare"></div><div class="label">Share of sector-months that beat the S&amp;P 500</div></div>
+  </div>
+
+  <section class="finding">
+    <p class="kicker">Finding 1</p>
+    <h2>Technology is the only sector that out-compounded the S&amp;P 500</h2>
+    <p>
+      From January 2019 through September 2026, $100 in the S&amp;P 500 grew to <span data-v="spxGrowth"></span>. Technology grew to
+      <span data-v="techGrowth"></span>, beating the index in <span data-v="techBeat"></span> of its months. No other sector caught the
+      index: the closest were <span data-v="second"></span> and <span data-v="third"></span>, and the furthest behind was
+      <span data-v="last"></span> at <span data-v="lastGrowth"></span>. Only Technology (<span data-v="techEx"></span>) and Energy
+      (<span data-v="energyEx"></span>) had a positive average monthly excess return.
+    </p>
+    <div class="chart-box">
+      <div class="chart-title">Growth of $100, January 2019 – September 2026 (dividends reinvested)</div>
+      <div class="canvas-wrap" style="height:380px"><canvas id="c1"></canvas></div>
+    </div>
+  </section>
+
+  <section class="finding">
+    <p class="kicker">Finding 2</p>
+    <h2>Leadership rotated: Energy went from the worst sector in 2020 to the best in 2022</h2>
+    <p>
+      Energy trailed the S&amp;P 500 by <span data-v="e2020"></span> a month in 2020, then beat it by <span data-v="e2022"></span>
+      a month in 2022, the year the index fell. Technology did the opposite in 2022 (<span data-v="t2022"></span>) before leading again
+      in 2023 (<span data-v="t2023"></span>). The sector with the best average excess return changed in <span data-v="leaderChanges"></span>
+      of the <span data-v="nYearPairs"></span> year-to-year transitions, so last year's leader is a weak guide to next year's.
+      Averages are per month, so 2026, which runs only January through September, is comparable with full years.
+    </p>
+    <div class="chart-box">
+      <div class="chart-title">Average monthly excess return vs. S&amp;P 500 by year, percentage points</div>
+      <div class="table-wrap"><table class="heat" id="heat"></table></div>
+      <p class="note">Blue: sector beat the S&amp;P 500 that year on average. Orange: it trailed. Bold: the year's leader.</p>
+    </div>
+  </section>
+
+  <section class="finding">
+    <p class="kicker">Finding 3</p>
+    <h2>Utilities, Consumer Staples and Health Care beat the index when it fell, and lagged when it rose</h2>
+    <p>
+      The S&amp;P 500 fell in <span data-v="nDown"></span> of the <span data-v="nMonths"></span> months. In those months Utilities beat
+      it by <span data-v="uDown"></span>, Consumer Staples by <span data-v="sDown"></span> and Health Care by <span data-v="hDown"></span>
+      on average, and Utilities and Staples beat it in <span data-v="usDownBeat"></span> of those months. The price of that protection
+      showed up in rising months, when the three trailed by <span data-v="defUpEx"></span> on average. Consumer Discretionary was the
+      weakest place to be in a falling market, at <span data-v="cdDown"></span>.
+    </p>
+    <div class="chart-box">
+      <div class="chart-title">Average monthly excess return vs. S&amp;P 500, by whether the S&amp;P 500 rose or fell that month</div>
+      <div class="canvas-wrap" style="height:400px"><canvas id="c3"></canvas></div>
+    </div>
+  </section>
+
+  <section class="finding">
+    <p class="kicker">Finding 4</p>
+    <h2>Energy's returns came with the most risk; Technology paid best for the risk taken</h2>
+    <p>
+      Energy's monthly returns had a standard deviation of <span data-v="eSd"></span>, about twice the S&amp;P 500's
+      <span data-v="spxSd"></span>, so its second-place average return (<span data-v="eAvg"></span> a month) came with the widest swings.
+      Technology earned <span data-v="tAvg"></span> a month with a standard deviation of <span data-v="tSd"></span>, the highest return per
+      unit of risk of any sector (<span data-v="tRatio"></span> against <span data-v="spxRatio"></span> for the index). Consumer Staples was
+      the steadiest sector at <span data-v="sSd"></span>.
+    </p>
+    <div class="chart-box">
+      <div class="chart-title">Average monthly return vs. monthly volatility (standard deviation), one dot per sector</div>
+      <div class="canvas-wrap"><canvas id="c4"></canvas></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>About the data</h2>
+    <h3>Source</h3>
+    <p>Monthly adjusted closing prices from Yahoo Finance for the eleven Select Sector SPDR exchange-traded funds, one for each S&amp;P 500
+      sector (XLK, XLF, XLE, XLV, XLY, XLP, XLI, XLB, XLU, XLRE, XLC), and for the SPDR S&amp;P 500 ETF (SPY), which stands in for the
+      S&amp;P 500. Adjusted prices include dividends, so every return here is a total return. The file on this site,
+      <code>sector_returns_2019_2026.csv</code>, holds the monthly returns computed from those prices.</p>
+    <h3>What one row is</h3>
+    <p>One sector in one calendar month: the sector fund's total return that month, the S&amp;P 500's total return the same month, the
+      difference between them, and whether the sector beat the index. Eleven sectors over 93 months make 1,023 rows.</p>
+    <h3>Rows dropped</h3>
+    <p>December 2018 is used only as the starting price for January 2019's return and is not a row. October 2026 is dropped because the
+      month is not complete. No other months or sectors are dropped. Comparisons between years use average monthly figures, so the
+      nine months of 2026 are compared fairly with twelve-month years.</p>
+    <h3>How each summary number is computed</h3>
+    <ul>
+      <li><b>Sector-months counted:</b> the number of rows in the current selection.</li>
+      <li><b>Average monthly return:</b> the average of <code>monthly_return</code>, where monthly return = this month's adjusted close
+        ÷ last month's adjusted close − 1, in percent.</li>
+      <li><b>Average monthly excess return vs. S&amp;P 500:</b> the average of <code>excess_return</code> = sector monthly return − S&amp;P 500
+        monthly return, in percentage points (pp).</li>
+      <li><b>Share of sector-months that beat the S&amp;P 500:</b> the average of <code>beat_sp500</code>, which is 1 when the sector's
+        monthly return is greater than the S&amp;P 500's and 0 otherwise, shown as a percent.</li>
+    </ul>
+    <p>Growth of $100 compounds each month's return in date order. Volatility is the sample standard deviation of monthly returns.
+      A "down month" is a month in which the S&amp;P 500's return was below zero.</p>
+
+    <h3>Agreement with the Tableau dashboard</h3>
+    <p>Both builds count all 1,023 sector-months, January 2019 – September 2026, with no filters applied.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Summary number</th><th>Website</th><th>Tableau</th></tr></thead>
+        <tbody>
+          <tr><td>Sector-months counted</td><td data-v="sectorMonthsFull"></td><td>pending</td></tr>
+          <tr><td>Average monthly return</td><td data-v="avgReturn"></td><td>pending</td></tr>
+          <tr><td>Average monthly excess return vs. S&amp;P 500</td><td data-v="avgExcess"></td><td>pending</td></tr>
+          <tr><td>Share of sector-months that beat the S&amp;P 500</td><td data-v="beatShare"></td><td>pending</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Tableau Public dashboard: link to be added.</p>
+  </section>
+
+  <footer>Every number on this page is computed in your browser from <code>sector_returns_2019_2026.csv</code>. This is a class
+    analysis of past returns, not investment advice. See the <a href="dashboard.html">dashboard</a> to filter by period, sector and
+    market direction.</footer>
+</main>
+
+<script src="chart.umd.js"></script>
+<script src="common.js"></script>
+<script>
+(async () => {
+  const rows = await loadData();
+  const v = {};
+  const s = summary(rows);
+  v.sectorMonths = fmtInt(s.sectorMonths); v.sectorMonthsFull = fmtInt(s.sectorMonths);
+  v.avgReturn = fmtPct(s.avgReturn); v.avgExcess = fmtPP(s.avgExcess); v.beatShare = fmtPct(s.beatShare, 1);
+
+  const bySector = groupBy(rows, 'sector');
+  const sectors = Object.keys(bySector);
+  const spxRows = bySector['Technology'].map(r => ({ ym: r.ym, monthly_return: r.sp500_return })); // one S&P row per month
+  const fmtDollar = x => '$' + fmtInt(x);
+  const spxEnd = growth(spxRows).at(-1).v;
+  const ends = sectors.map(sct => ({ sct, end: growth(bySector[sct]).at(-1).v })).sort((a, b) => b.end - a.end);
+  const ex = sct => mean(bySector[sct], 'excess_return');
+  v.spxGrowth = fmtDollar(spxEnd);
+  v.techGrowth = fmtDollar(ends.find(d => d.sct === 'Technology').end);
+  v.techEx = fmtPP(ex('Technology')); v.energyEx = fmtPP(ex('Energy'));
+  v.techBeat = fmtPct(mean(bySector['Technology'], 'beat_sp500') * 100, 0);
+  v.second = `${ends[1].sct} (${fmtDollar(ends[1].end)})`; v.third = `${ends[2].sct} (${fmtDollar(ends[2].end)})`;
+  v.last = ends.at(-1).sct; v.lastGrowth = fmtDollar(ends.at(-1).end);
+
+  // Finding 1: growth of $100
+  const months = spxRows.map(r => r.ym);
+  const ds = ends.map(d => ({
+    label: d.sct, data: growth(bySector[d.sct]).map(g => g.v),
+    borderColor: SECTOR_COLORS[d.sct], backgroundColor: SECTOR_COLORS[d.sct],
+    borderWidth: d.sct === 'Technology' ? 3 : 1.5, pointRadius: 0, tension: .1
+  }));
+  ds.unshift({ label: 'S&P 500', data: growth(spxRows).map(g => g.v), borderColor: COLORS.spx, backgroundColor: COLORS.spx,
+    borderWidth: 3, borderDash: [6, 4], pointRadius: 0, tension: .1 });
+  new Chart(document.getElementById('c1'), {
+    type: 'line', data: { labels: months.map(fmtYM), datasets: ds },
+    options: { interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'right', labels: { font: { size: 12 } } },
+        tooltip: { itemSort: (a, b) => b.parsed.y - a.parsed.y, callbacks: { label: c => `${c.dataset.label}: ${fmtDollar(c.parsed.y)}` } } },
+      scales: { y: { title: { display: true, text: 'Value of $100 invested Jan 2019' }, ticks: { callback: fmtDollar } },
+                x: { ticks: { maxTicksLimit: 9 } } } }
+  });
+
+  // Finding 2: heatmap of yearly average excess
+  const years = [...new Set(rows.map(r => r.year))].sort();
+  const cell = {}; let max = 0;
+  years.forEach(y => sectors.forEach(sct => {
+    const val = mean(rows.filter(r => r.year === y && r.sector === sct), 'excess_return');
+    cell[y + sct] = val; max = Math.max(max, Math.abs(val));
+  }));
+  const leader = {}; years.forEach(y => leader[y] = sectors.reduce((a, b) => cell[y + a] > cell[y + b] ? a : b));
+  const order = [...sectors].sort((a, b) => ex(b) - ex(a));
+  let h = '<thead><tr><th>Sector</th>' + years.map(y => `<th>${y === 2026 ? '2026<br><span class="note">Jan–Sep</span>' : y}</th>`).join('') + '</tr></thead><tbody>';
+  order.forEach(sct => {
+    h += `<tr><td>${sct}</td>` + years.map(y => {
+      const x = cell[y + sct];
+      return `<td style="background:${heatColor(x, max)};color:${heatText(x, max)};${leader[y] === sct ? 'font-weight:700' : ''}">${(x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(2)}</td>`;
+    }).join('') + '</tr>';
+  });
+  document.getElementById('heat').innerHTML = h + '</tbody>';
+  v.e2020 = fmtPP(-cell[2020 + 'Energy']).replace('+', ''); v.e2022 = fmtPP(cell[2022 + 'Energy']).replace('+', '');
+  v.t2022 = fmtPP(cell[2022 + 'Technology']); v.t2023 = fmtPP(cell[2023 + 'Technology']);
+  let changes = 0; for (let i = 1; i < years.length; i++) if (leader[years[i]] !== leader[years[i - 1]]) changes++;
+  v.leaderChanges = changes; v.nYearPairs = years.length - 1;
+
+  // Finding 3: down vs up months
+  const isDown = r => r.sp500_return < 0;
+  v.nDown = new Set(rows.filter(isDown).map(r => r.ym)).size; v.nMonths = months.length;
+  const defs = ['Utilities', 'Consumer Staples', 'Health Care'];
+  const exIn = (sct, cond) => mean(bySector[sct].filter(cond), 'excess_return');
+  const defDown = rows.filter(r => defs.includes(r.sector) && isDown(r));
+  const defUp = rows.filter(r => defs.includes(r.sector) && !isDown(r));
+  v.defDownEx = fmtPP(mean(defDown, 'excess_return')).replace('+', ''); v.defUpEx = fmtPP(-mean(defUp, 'excess_return')).replace('+', '');
+  v.uDown = fmtPP(exIn('Utilities', isDown)).replace('+', ''); v.sDown = fmtPP(exIn('Consumer Staples', isDown)).replace('+', '');
+  v.hDown = fmtPP(exIn('Health Care', isDown)).replace('+', '');
+  v.usDownBeat = fmtPct(mean(rows.filter(r => ['Utilities', 'Consumer Staples'].includes(r.sector) && isDown(r)), 'beat_sp500') * 100, 0);
+  v.cdDown = fmtPP(exIn('Consumer Discretionary', isDown));
+  const o3 = [...sectors].sort((a, b) => exIn(b, isDown) - exIn(a, isDown));
+  new Chart(document.getElementById('c3'), {
+    type: 'bar',
+    data: { labels: o3, datasets: [
+      { label: `Months the S&P 500 fell (${v.nDown})`, data: o3.map(sct => exIn(sct, isDown)), backgroundColor: COLORS.neg },
+      { label: `Months the S&P 500 rose (${v.nMonths - v.nDown})`, data: o3.map(sct => exIn(sct, r => !isDown(r))), backgroundColor: COLORS.pos }] },
+    options: { indexAxis: 'y', plugins: { tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmtPP(c.parsed.x)}` } } },
+      scales: { x: { title: { display: true, text: 'Average monthly excess return, percentage points' }, ticks: { callback: x => fmtPP(x, 1) } },
+                y: { ticks: { autoSkip: false } } } }
+  });
+
+  // Finding 4: risk vs return
+  const spxSd = sd(spxRows, 'monthly_return'), spxAvg = mean(spxRows, 'monthly_return');
+  const rr = sectors.map(sct => ({ sct, avg: mean(bySector[sct], 'monthly_return'), sd: sd(bySector[sct], 'monthly_return') }));
+  const R = sct => rr.find(d => d.sct === sct);
+  v.eSd = fmtPct(R('Energy').sd); v.spxSd = fmtPct(spxSd); v.eAvg = fmtPct(R('Energy').avg);
+  v.tAvg = fmtPct(R('Technology').avg); v.tSd = fmtPct(R('Technology').sd); v.sSd = fmtPct(R('Consumer Staples').sd);
+  v.tRatio = (R('Technology').avg / R('Technology').sd).toFixed(2); v.spxRatio = (spxAvg / spxSd).toFixed(2);
+  new Chart(document.getElementById('c4'), {
+    type: 'scatter',
+    data: { datasets: [
+      ...rr.map(d => ({ label: d.sct, data: [{ x: d.sd, y: d.avg }], backgroundColor: SECTOR_COLORS[d.sct], pointRadius: 7 })),
+      { label: 'S&P 500', data: [{ x: spxSd, y: spxAvg }], backgroundColor: COLORS.spx, pointStyle: 'rectRot', pointRadius: 9 }] },
+    options: { plugins: { legend: { position: 'right', labels: { font: { size: 12 } } },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmtPct(c.parsed.y)} a month, volatility ${fmtPct(c.parsed.x)}` } } },
+      scales: { x: { title: { display: true, text: 'Volatility: standard deviation of monthly returns' }, ticks: { callback: x => x + '%' } },
+                y: { title: { display: true, text: 'Average monthly return' }, ticks: { callback: x => x.toFixed(1) + '%' } } } }
+  });
+
+  document.querySelectorAll('[data-v]').forEach(el => { el.textContent = v[el.dataset.v]; });
+})();
+</script>
+</body>
+</html>
